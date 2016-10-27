@@ -24,10 +24,11 @@ private:
 	void descendTree(T pData, Node *pNode);
 	void addLeft(T pData, Node *pNode);
 	void addRight(T pData, Node *pNode);
-	void balanceTree(Node *pNode);
-	int getLeftHeight(Node *pNode, int height);
-	int getRightHeight(Node *pNode, int height);
-	int getHeight(Node *pNode, int height);
+	void balanceTree(Node *&pNode);
+	int getLeftHeight(Node *&pNode, int height);
+	int getRightHeight(Node *&pNode, int height);
+	int getBalance(Node *&pNode, int height);
+	void rotate(Node* &pNode,int balanceFactor);
 public:
 	Tree();
 	void print();
@@ -108,7 +109,7 @@ void Tree<T>::addRight(T pData, Node *pNode) {
 }
 
 template<class T>
-void Tree<T>::balanceTree(Node* pNode) {
+void Tree<T>::balanceTree(Node* &pNode) {
 	
 	int balanceFactor;
 
@@ -118,14 +119,14 @@ void Tree<T>::balanceTree(Node* pNode) {
 	if (pNode->right != nullptr) {
 		balanceTree(pNode->right);
 	}
-	balanceFactor = abs(getHeight(pNode, 0));//abs(getLeftHeight(pNode, 0) - getRightHeight(pNode, 0));
-	if (balanceFactor >= 2) {
-		cout << "tree out of balance at: " << pNode->data << endl;
+	balanceFactor = getBalance(pNode, 0);//abs(getLeftHeight(pNode, 0) - getRightHeight(pNode, 0));
+	if (balanceFactor <= -2 || balanceFactor >= 2) {
+		rotate(pNode, balanceFactor);
 	}
 }
 
 template<class T>
-int Tree<T>::getLeftHeight(Node *pNode, int height) {
+int Tree<T>::getLeftHeight(Node *&pNode, int height) {
 
 	if (pNode->left != nullptr) {//if there is something on the left, add to height
 		height += 1;
@@ -138,7 +139,7 @@ int Tree<T>::getLeftHeight(Node *pNode, int height) {
 }
 
 template<class T>
-int Tree<T>::getRightHeight(Node *pNode, int height) {
+int Tree<T>::getRightHeight(Node *&pNode, int height) {
 
 	if (pNode->right != nullptr) {//if something on right, add to height
 		height += 1;
@@ -152,7 +153,7 @@ int Tree<T>::getRightHeight(Node *pNode, int height) {
 }
 
 template<class T>
-int Tree<T>::getHeight(Node *pNode, int height) {
+int Tree<T>::getBalance(Node *&pNode, int height) {
 	int leftHeight = height;
 	int rightHeight = height;
 	
@@ -171,4 +172,80 @@ int Tree<T>::getHeight(Node *pNode, int height) {
 	}
 }
 
+template<class T>
+void Tree<T>::rotate(Node *&pNode,int balanceFactor) {
+	Node *parent;
+	Node *child;
+	Node *grandChild;
+	
+	if (balanceFactor < 0) {
+		
+		if (getBalance(pNode->right,0) > 0){//if balance factor of next node is positive than RL
+			cout << "RL at " << pNode->data << endl;
+			parent = pNode;
+			child = pNode->right;
+			grandChild = child->left;
+			//if no children
+			if (parent->left == nullptr) {
+				temp = pNode->right->left;//grandchild
+				temp->left = pNode;
+				temp->right = pNode->right;
+				grandChild->left->left = nullptr;
+				grandChild->left->right = nullptr;
+				grandChild->right->right = nullptr;
+				grandChild->right->left = nullptr;
+				pNode = temp;
+			}
+			//if children
+			if (parent->left != nullptr && grandChild->left != nullptr) {
+				Node *leftGGC = grandChild->left;
+				Node *leftChild = parent->left;
+				temp = grandChild;
+				temp->right = child;
+				temp->left = parent;
+				leftChild->right = leftGGC;
+				child->left = nullptr;
+				pNode = temp;
+			}
+		}
+		else {//RR
+			cout << "RR at " << pNode->data << endl;
+			parent = pNode;
+			child = pNode->right;
+			grandChild = pNode->right->right;
+			temp = child;
+			child->left = parent;
+			parent->right = nullptr;
+			parent->left = nullptr;
+			pNode = temp;
+		}
+	}
+	else {
+		if (getBalance(pNode->left, 0) < 0) {//if balance factor of next node is negative than LR
+			cout << "LR at " << pNode->data << endl;
+			parent = pNode;
+			child = pNode->left;
+			grandChild = child->right;
+			temp = grandChild;
+			temp->left = child;
+			temp->right = parent;
+			child->right = nullptr;
+			child->left = nullptr;
+			parent->right = nullptr;
+			parent->left = nullptr;
+			pNode = temp;
+		}
+		else {
+			cout << "LL at " << pNode->data << endl;
+			parent = pNode;
+			child = pNode->left;
+			grandChild = child->left;
+			temp = child;
+			temp->right = parent;
+			parent->right = nullptr;
+			parent->left = nullptr;
+			pNode = temp;
+		}
+	}
+}
 #endif

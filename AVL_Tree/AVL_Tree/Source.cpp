@@ -1,30 +1,44 @@
 #include<iostream>
 #include<string>
+#include<fstream>
 #include "Tree.h"
 
 using namespace std;
 
+void loadData(ifstream &inFile, Tree<int> &tree);
+
 int main() {
+	ifstream inFile;
 	Tree<int> tree;
 
-	cout << "adding 5" << endl;
-	tree.add(5);
-	cout << "adding 2" << endl;
-	tree.add(2);
-	cout << "adding 3" << endl;
-	tree.add(3);
-	cout << "adding 6" << endl;
-	tree.add(6);
-	cout << "adding 1" << endl;
-	tree.add(1);
-	cout << "adding 9" << endl;
-	tree.add(9);
-	cout << "adding 7" << endl;
-	tree.add(7);
-	cout << "adding 8" << endl;
-	tree.add(8);
-
+	loadData(inFile, tree);
 	tree.print();
+
+	cin.ignore();
 	cin.get();
 	return 0;
+}
+
+void loadData(ifstream &inFile, Tree<int> &tree) {
+	string fileName;
+
+	cout << "please enter the filepath of the file to open: ";
+	cin >> fileName;
+
+	inFile.open(fileName);
+	if (inFile) {
+		while (!inFile.eof()) {
+			int data;
+			inFile >> data;
+			if (data == 13) {
+				cout << "test";
+			}
+			tree.add(data);
+		}
+	}
+	else {
+		cout << "file not found!" << endl;
+	}
+
+	inFile.close();
 }
